@@ -17,6 +17,12 @@ const dburi = "mongodb://127.0.0.1:27017"
 const dbname = "hotel-reservation"
 const userColl = "users"
 
+var config = fiber.Config{
+	ErrorHandler: func(c *fiber.Ctx, err error) error {
+		return c.JSON(map[string]string{"error": err.Error()})
+	},
+}
+
 func main() {
 
 	listenAddr := flag.String("listenAddr", ":3000", "The listen address of the API server")
@@ -27,7 +33,7 @@ func main() {
 		log.Fatal("error with mongo connect", err)
 	}
 
-	app := fiber.New()
+	app := fiber.New(config)
 	apiv1 := app.Group("/api/v1")
 
 	// handlers initialization
