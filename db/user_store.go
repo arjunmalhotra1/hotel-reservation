@@ -1,15 +1,15 @@
 package db
 
 import (
+	"context"
+
 	"github.com/arjunmalhotra1/hotel-reservation/types"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-const DBNAME = "hotel-reservation"
-const UserColl = "users"
-
 type UserStore interface {
-	GetUserByID(string) (*types.User, error)
+	GetUserByID(context.Context, string) (*types.User, error)
 }
 
 type MongoUserStore struct {
@@ -25,6 +25,10 @@ func NewMongoUserStore(client *mongo.Client) *MongoUserStore {
 	}
 }
 
-func (s *MongoUserStore) GetUserByID(string) (*types.User, error) {
-	return nil, nil
+func (s *MongoUserStore) GetUserByID(ctx context.Context, id string) (*types.User, error) {
+	var user types.User
+	if err := s.coll.FindOne(ctx, bson.M{"_id": ToObjectId(id)}).Decode(&user); err != nil {
+		return nil, err
+	}
+	return &user, nil
 }
