@@ -13,8 +13,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const dburi = "mongodb://127.0.0.1:27017"
-const dbname = "hotel-reservation"
 const userColl = "users"
 
 var config = fiber.Config{
@@ -28,7 +26,7 @@ func main() {
 	listenAddr := flag.String("listenAddr", ":3000", "The listen address of the API server")
 	flag.Parse()
 
-	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(dburi))
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(db.DBURI))
 	if err != nil {
 		log.Fatal("error with mongo connect", err)
 	}
@@ -37,7 +35,7 @@ func main() {
 	apiv1 := app.Group("/api/v1")
 
 	// handlers initialization
-	userHandler := api.NewUserHandler(db.NewMongoUserStore(client, dbname))
+	userHandler := api.NewUserHandler(db.NewMongoUserStore(client, db.DBNAME))
 
 	// We group the user endpoint with apiv1.
 	apiv1.Put("/user/:id", userHandler.HandlePutUser)
