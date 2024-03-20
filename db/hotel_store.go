@@ -19,10 +19,10 @@ type MongoHotelStore struct {
 	coll   *mongo.Collection
 }
 
-func NewMongoHotelStore(client *mongo.Client, dbname string) *MongoHotelStore {
+func NewMongoHotelStore(client *mongo.Client) *MongoHotelStore {
 	return &MongoHotelStore{
 		client: client,
-		coll:   client.Database(dbname).Collection("hotels"),
+		coll:   client.Database(DBNAME).Collection("hotels"),
 	}
 }
 
@@ -36,7 +36,7 @@ func (s *MongoHotelStore) InsertHotel(ctx context.Context, hotel *types.Hotel) (
 	return hotel, nil
 }
 
-func (s *MongoHotelStore) Insert(ctx context.Context, filter bson.M, update bson.M) error {
+func (s *MongoHotelStore) Update(ctx context.Context, filter bson.M, update bson.M) error {
 	_, err := s.coll.UpdateOne(ctx, filter, update)
 	return err
 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/arjunmalhotra1/hotel-reservation/db"
 	"github.com/arjunmalhotra1/hotel-reservation/types"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -14,12 +15,21 @@ import (
 func main() {
 	ctx := context.Background()
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(db.DBURI))
-	hotelStore := db.NewMongoHotelStore(client, db.DBNAME)
-	roomStore := db.NewMongoRoomStore(client, db.DBNAME)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if err := client.Database(db.DBNAME).Drop(ctx); err != nil {
+		log.Fatal(err)
+	}
+
+	hotelStore := db.NewMongoHotelStore(client)
+	roomStore := db.NewMongoRoomStore(client, hotelStore)
 
 	hotel := types.Hotel{
 		Name:     "Bellucia",
 		Location: "France",
+		Rooms:    []primitive.ObjectID{},
 	}
 
 	rooms := []types.Room{
