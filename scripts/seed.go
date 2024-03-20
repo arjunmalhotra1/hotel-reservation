@@ -14,23 +14,43 @@ import (
 func main() {
 	ctx := context.Background()
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(db.DBURI))
-	HotelStore := db.NewMongoHotelStore(client, db.DBNAME)
+	hotelStore := db.NewMongoHotelStore(client, db.DBNAME)
+	roomStore := db.NewMongoRoomStore(client, db.DBNAME)
 
 	hotel := types.Hotel{
 		Name:     "Bellucia",
 		Location: "France",
 	}
 
-	room := types.Room{
-		Type:      types.SinglePersonRoomType,
-		BasePrice: 99.9,
+	rooms := []types.Room{
+		{
+			Type:      types.SinglePersonRoomType,
+			BasePrice: 99.9,
+		},
+		{
+			Type:      types.DeluxePersonRoomType,
+			BasePrice: 199.9,
+		},
+		{
+			Type:      types.SeaSidePersonRoomType,
+			BasePrice: 122.9,
+		},
 	}
-	_ = room
 
-	insertedHotel, err := HotelStore.InsertHotel(ctx, &hotel)
+	insertedHotel, err := hotelStore.InsertHotel(ctx, &hotel)
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	for _, room := range rooms {
+		room.HotelID = insertedHotel.ID
+		insertedRoom, err := roomStore.InsertRoom(ctx, &room)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(insertedRoom)
+	}
+
 	fmt.Println(insertedHotel)
+
 }

@@ -4,12 +4,14 @@ import (
 	"context"
 
 	"github.com/arjunmalhotra1/hotel-reservation/types"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type HotelStore interface {
 	InsertHotel(context.Context, *types.Hotel) (*types.Hotel, error)
+	Update(context.Context, bson.M, bson.M) error
 }
 
 type MongoHotelStore struct {
@@ -32,4 +34,9 @@ func (s *MongoHotelStore) InsertHotel(ctx context.Context, hotel *types.Hotel) (
 
 	hotel.ID = resp.InsertedID.(primitive.ObjectID)
 	return hotel, nil
+}
+
+func (s *MongoHotelStore) Insert(ctx context.Context, filter bson.M, update bson.M) error {
+	_, err := s.coll.UpdateOne(ctx, filter, update)
+	return err
 }
